@@ -1,35 +1,31 @@
 class StringToSecondsConverter
+  attr_reader :string
 
   def initialize(string)
     @string = string
   end
 
   def convert!
-    final_seconds = 0
+    final_seconds = splited_string.reduce(0) do |memo, count_name_pair|
+      times_count = count_name_pair[0].to_i
+      times_name = count_name_pair[1]
+      found = false
 
-    time_and_seconds.each do |time, seconds|
-      splited_string = @string.split(' ' + time.to_s)
-      if /[A-Za-z]+/.match(splited_string[0])
-        number = 0
-        @string = splited_string[0]
-      else
-        number = splited_string[0].to_i rescue 0
-        @string = next_string(splited_string)
+      time_and_seconds.each do |time, seconds|
+        if /#{time}/.match(times_name)
+          memo += seconds * times_count
+          found = true
+          break
+        end
       end
-      final_seconds += seconds * number
+      found ? memo : break
     end
-
-    puts final_seconds
-
+    puts final_seconds ? final_seconds : 'Wrong type of time. Please make sure that your input is right and try again.'
     final_seconds
   end
 
-  def next_string(splited_string)
-    if splited_string[1]
-      splited_string[1][0] == 's' ? splited_string[1][1..-1] : splited_string[1]
-    else
-      ''
-    end
+  def splited_string
+    @splited_string ||= string.split(' ').enum_for(:each_slice, 2).to_a
   end
 
   def time_and_seconds
